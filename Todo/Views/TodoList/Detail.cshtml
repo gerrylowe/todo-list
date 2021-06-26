@@ -25,13 +25,13 @@
             switch (item.Importance)
             {
                 case Importance.High:
-                    contextualClass = "list-group-item-danger";
+                    contextualClass = item.IsDone ? "list-group-item-danger list-group-item-done" : "list-group-item-danger";
                     break;
                 case Importance.Low:
-                    contextualClass = "list-group-item-info";
+                    contextualClass = item.IsDone ? "list-group-item-info list-group-item-done" : "list-group-item-info";
                     break;
                 default:
-                    contextualClass = "";
+                    contextualClass = item.IsDone ? "list-group-item-done" : "";
                     break;
             }
 
@@ -66,4 +66,22 @@
             </li>
         }
     </ul>
+    <input type="checkbox" id="showHideDoneItems">
+    <label for="showHideDoneItems">Hide items marked as done</label><br>
 </div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            $("#showHideDoneItems").change(showHideDoneItems);
+        });
+
+        function showHideDoneItems() {
+            if (this.checked == true) {
+                $(".list-group-item-done").hide();
+            } else {
+                $(".list-group-item-done").show();
+            }
+        }
+    </script>
+}
