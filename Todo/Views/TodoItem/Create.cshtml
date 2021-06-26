@@ -39,11 +39,11 @@
             </div>
 
             <div class="form-group">
-                <label asp-for="ResponsiblePartyId"></label>
+                @Html.LabelFor(m => m.ResponsiblePartyId, "Responsible Party")
                 @Html.DropDownListFor(
                     m => m.ResponsiblePartyId,
                     dbContext.UserSelectListItems(),
-                    new {@class="form-control"}
+                    new { @class = "form-control" }
                     )
                 <span asp-validation-for="ResponsiblePartyId" class="text-danger"></span>
             </div>
