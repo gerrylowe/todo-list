@@ -11,7 +11,14 @@
 
 <div class="col-md-6">
 
-    <ul class="list-group">
+    <input type="checkbox" id="showHideDoneItems">
+    <label for="showHideDoneItems">Hide items marked as done</label>
+    &nbsp;
+    <input type="checkbox" id="sortItemsByRank">
+    <label for="sortItemsByRank">Sort items by rank</label>
+    <br />
+
+    <ul id="itemList" class="list-group">
 
         <li class="list-group-item">
             <a asp-action="Create" asp-controller="TodoItem" asp-route-todoListId="@Model.TodoListId">
@@ -35,8 +42,8 @@
                     break;
             }
 
-            <li class="list-group-item @contextualClass">
-                
+            <li class="list-group-item @contextualClass" data-rank="@item.Rank">
+
                 <div class="row">
 
                 <div class="col-md-6">
@@ -70,14 +77,20 @@
             </li>
         }
     </ul>
-    <input type="checkbox" id="showHideDoneItems">
-    <label for="showHideDoneItems">Hide items marked as done</label><br>
 </div>
 
 @section Scripts {
     <script>
+        var originalItems = [];
+
         $(document).ready(function () {
             $("#showHideDoneItems").change(showHideDoneItems);
+            $("#sortItemsByRank").change(sortItemsByRank);
+
+            // Store original items so that sort order can be restored.
+            $("#itemList li[data-rank]").each(function () {
+                originalItems.push($(this));
+            });
         });
 
         function showHideDoneItems() {
@@ -86,6 +99,34 @@
             } else {
                 $(".list-group-item-done").show();
             }
+        }
+
+        function sortItemsByRank() {
+            var sortedItems = [];
+            if (this.checked == true) {
+                // Order items by rank.
+                $("#itemList li[data-rank]").each(function () {
+                    sortedItems.push($(this));
+                });
+                sortedItems.sort(compareItems);
+                showItems(sortedItems);
+            } else {
+                // Restore original item order.
+                showItems(originalItems);
+            }
+        }
+
+        function compareItems(item1, item2) {
+            // Descending by rank.
+            var rank1 = parseInt($(item1).attr("data-rank"));
+            var rank2 = parseInt($(item2).attr("data-rank"));
+            return rank2 - rank1;
+        }
+
+        function showItems(items) {
+            // Replace all items except first (the "add new item" <li>).
+            $("#itemList").slice(1).remove();
+            $("#itemList").append(items);
         }
     </script>
 }
