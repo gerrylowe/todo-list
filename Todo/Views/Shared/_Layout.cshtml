@@ -103,7 +103,6 @@
                 type: "GET",
                 url: "@gravatarUrl",
                 dataType: "jsonp",
-                jsonpCallback: 'onProfileSuccess',
                 success: function (profile) {
                     onProfileSuccess(profile);
                 },

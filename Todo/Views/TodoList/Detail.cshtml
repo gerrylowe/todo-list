@@ -70,6 +70,8 @@
 
                         <img src="https://www.gravatar.com/avatar/@Gravatar.GetHash(item.ResponsibleParty.Email)?s=30"/>
 
+                        <span data-user-hash="@Gravatar.GetHash(item.ResponsibleParty.Email)"></span>
+
                     </small>
                 </div>
                 </div>
@@ -91,7 +93,35 @@
             $("#itemList li[data-rank]").each(function () {
                 originalItems.push($(this));
             });
+
+            setResponsiblePartyUsernames();
         });
+
+        function setResponsiblePartyUsernames() {
+            // Issue a gravatar profile lookup for each unique responsible party.
+            @foreach(var email in Model.Items.Select(i => i.ResponsibleParty.Email).Distinct())
+            {
+                <text>retrieveResponsiblePartyUsername("@Gravatar.GetHash(email)");</text>
+            }
+        }
+
+        function retrieveResponsiblePartyUsername(userHash) {
+            $.ajax({
+                type: "GET",
+                url: "https://www.gravatar.com/" + userHash + ".json?s=30",
+                dataType: "jsonp",
+                success: function (profile) {
+                    onUsernameRetrieved(profile);
+                },
+                error: function (xhr, status) {
+                    console.log(xhr.responseText);
+                }
+            });
+        }
+
+        function onUsernameRetrieved(profile) {
+            $("span[data-user-hash='" + profile.entry[0].hash + "']").text(profile.entry[0].displayName);
+        }
 
         function showHideDoneItems() {
             if (this.checked == true) {
