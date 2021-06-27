@@ -12,7 +12,7 @@ namespace Todo.Tests
     {
         private readonly string title;
         private readonly IdentityUser owner;
-        private readonly List<(string Name, Importance Importance, IdentityUser ResponsibleParty)> items = new List<(string, Importance, IdentityUser)>();
+        private readonly List<(string Name, Importance Importance, int Rank, IdentityUser ResponsibleParty)> items = new List<(string, Importance, int, IdentityUser)>();
 
         public TestTodoListBuilder(IdentityUser owner, string title)
         {
@@ -20,19 +20,18 @@ namespace Todo.Tests
             this.owner = owner;
         }
 
-        public TestTodoListBuilder WithItem(string itemTitle, Importance importance, IdentityUser responsiblePartry = null)
+        public TestTodoListBuilder WithItem(string itemTitle, Importance importance, IdentityUser responsiblePartry = null, int rank = 0)
         {
-            items.Add((itemTitle, importance, (responsiblePartry == null) ? owner : responsiblePartry));
+            items.Add((itemTitle, importance, rank, (responsiblePartry == null) ? owner : responsiblePartry));
             return this;
         }
 
         public TodoList Build()
         {
             var todoList = new TodoList(owner, title);
-            var todoItems = items.Select(itm => new TodoItem(todoList.TodoListId, itm.ResponsibleParty.Id, itm.Name, itm.Importance).WithResponsibleParty(itm.ResponsibleParty));
+            var todoItems = items.Select(itm => new TodoItem(todoList.TodoListId, itm.ResponsibleParty.Id, itm.Name, itm.Importance, itm.Rank).WithResponsibleParty(itm.ResponsibleParty));
             todoItems.ToList().ForEach(tlItm =>
             {
-                tlItm.ResponsibleParty = owner;
                 todoList.Items.Add(tlItm);
                 tlItm.TodoList = todoList;
             });

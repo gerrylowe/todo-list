@@ -39,7 +39,7 @@
                 
                 <div class="row">
 
-                <div class="col-md-8">
+                <div class="col-md-6">
                     <a asp-action="Edit" asp-controller="TodoItem" asp-route-todoItemId="@item.TodoItemId">
 
                         @if (item.IsDone)
@@ -51,6 +51,10 @@
                             <text>@item.Title</text>
                         }
                     </a>
+                </div>
+
+                <div class="col-md-2">
+                    Rank: @item.Rank
                 </div>
 
                 <div class="col-md-4 text-right">
