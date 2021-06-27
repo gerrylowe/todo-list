@@ -1,19 +1,24 @@
-﻿<!DOCTYPE html>
+﻿@using Microsoft.AspNetCore.Identity
+@using Todo.Services
+@inject SignInManager<IdentityUser> SignInManager
+@inject UserManager<IdentityUser> UserManager
+
+<!DOCTYPE html>
 <html>
 <head>
-    <meta charset="utf-8"/>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - Todo</title>
 
     <environment include="Development">
-        <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.css"/>
-        <link rel="stylesheet" href="~/css/site.css"/>
+        <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.css" />
+        <link rel="stylesheet" href="~/css/site.css" />
     </environment>
     <environment exclude="Development">
         <link rel="stylesheet" href="https://ajax.aspnetcdn.com/ajax/bootstrap/3.3.7/css/bootstrap.min.css"
               asp-fallback-href="~/lib/bootstrap/dist/css/bootstrap.min.css"
-              asp-fallback-test-class="sr-only" asp-fallback-test-property="position" asp-fallback-test-value="absolute"/>
-        <link rel="stylesheet" href="~/css/site.min.css" asp-append-version="true"/>
+              asp-fallback-test-class="sr-only" asp-fallback-test-property="position" asp-fallback-test-value="absolute" />
+        <link rel="stylesheet" href="~/css/site.min.css" asp-append-version="true" />
     </environment>
 </head>
 <body>
@@ -30,33 +35,33 @@
         </div>
         <div class="navbar-collapse collapse">
             @*<ul class="nav navbar-nav">
-                $1$<li>
-                    <a asp-area="" asp-controller="Home" asp-action="Index">Home</a>
-                </li>
-                <li>
-                    <a asp-area="" asp-controller="Home" asp-action="About">About</a>
-                </li>
-                <li>
-                    <a asp-area="" asp-controller="Home" asp-action="Contact">Contact</a>
-                </li>
-                <li>
-                    <a asp-area="" asp-controller="TodoList" asp-action="Index">Todo Lists</a>
-                </li>#1#
-            </ul>*@
-            <partial name="_LoginPartial"/>
+                    $1$<li>
+                        <a asp-area="" asp-controller="Home" asp-action="Index">Home</a>
+                    </li>
+                    <li>
+                        <a asp-area="" asp-controller="Home" asp-action="About">About</a>
+                    </li>
+                    <li>
+                        <a asp-area="" asp-controller="Home" asp-action="Contact">Contact</a>
+                    </li>
+                    <li>
+                        <a asp-area="" asp-controller="TodoList" asp-action="Index">Todo Lists</a>
+                    </li>#1#
+                </ul>*@
+            <partial name="_LoginPartial" />
         </div>
     </div>
 </nav>
 
-<partial name="_CookieConsentPartial"/>
+<partial name="_CookieConsentPartial" />
 
 <div class="container body-content">
-    
+
     <div class="row">
         @RenderBody()
     </div>
 
-    <hr/>
+    <hr />
     <footer>
         <p>&copy; 2018 - Storm ID Ltd.</p>
     </footer>
@@ -82,6 +87,42 @@
     </script>
     <script src="~/js/site.min.js" asp-append-version="true"></script>
 </environment>
+
+@if (SignInManager.IsSignedIn(User))
+{
+    var iu = await UserManager.GetUserAsync(User);
+    var emailAddress = await UserManager.GetEmailAsync(iu);
+    var gravatarhash = Gravatar.GetHash(emailAddress);
+    var gravatarUrl = $"https://www.gravatar.com/{@gravatarhash}.json?s=30";
+
+    <script>
+        $(document).ready(retrieveGravatarUsername);
+
+        function retrieveGravatarUsername() {
+            $.ajax({
+                type: "GET",
+                url: "@gravatarUrl",
+                dataType: "jsonp",
+                jsonpCallback: 'onProfileSuccess',
+                success: function (profile) {
+                    onProfileSuccess(profile);
+                },
+                error: function (xhr, status) {
+                    console.log(xhr.responseText);
+                    onProfileFailure();
+                }
+            });
+        }
+
+        function onProfileSuccess(profile) {
+            $("#gravatarUsername").text(profile.entry[0].displayName);
+        }
+
+        function onProfileFailure() {
+            $("#gravatarUsername").text("Username not available");
+        }
+    </script>
+}
 
 @RenderSection("Scripts", required: false)
 </body>
