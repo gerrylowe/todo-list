@@ -12,7 +12,7 @@ namespace Todo.Tests
     {
         private readonly string title;
         private readonly IdentityUser owner;
-        private readonly List<(string, Importance)> items = new List<(string, Importance)>();
+        private readonly List<(string Name, Importance Importance, IdentityUser ResponsibleParty)> items = new List<(string, Importance, IdentityUser)>();
 
         public TestTodoListBuilder(IdentityUser owner, string title)
         {
@@ -20,16 +20,16 @@ namespace Todo.Tests
             this.owner = owner;
         }
 
-        public TestTodoListBuilder WithItem(string itemTitle, Importance importance)
+        public TestTodoListBuilder WithItem(string itemTitle, Importance importance, IdentityUser responsiblePartry = null)
         {
-            items.Add((itemTitle, importance));
+            items.Add((itemTitle, importance, (responsiblePartry == null) ? owner : responsiblePartry));
             return this;
         }
 
         public TodoList Build()
         {
             var todoList = new TodoList(owner, title);
-            var todoItems = items.Select(itm => new TodoItem(todoList.TodoListId, owner.Id, itm.Item1, itm.Item2));
+            var todoItems = items.Select(itm => new TodoItem(todoList.TodoListId, itm.ResponsibleParty.Id, itm.Name, itm.Importance).WithResponsibleParty(itm.ResponsibleParty));
             todoItems.ToList().ForEach(tlItm =>
             {
                 tlItm.ResponsibleParty = owner;
@@ -37,6 +37,17 @@ namespace Todo.Tests
                 tlItm.TodoList = todoList;
             });
             return todoList;
+        }
+    }
+
+    public static class TodoListItemExtensions
+    {
+        public static TodoItem WithResponsibleParty(this TodoItem todoItem, IdentityUser responsibleParty)
+        {
+            todoItem.ResponsiblePartyId = responsibleParty.Id;
+            todoItem.ResponsibleParty = responsibleParty;
+
+            return todoItem;
         }
     }
 }
