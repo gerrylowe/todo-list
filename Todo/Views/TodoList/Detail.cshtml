@@ -34,7 +34,12 @@
 
             <div class="form-group">
                 <label for="responsiblePartyId">Responsible Party</label>
-                @Html.DropDownList("responsiblePartyId", dbContext.UserSelectListItems(), new { @class = "form-control" })
+                <select class="form-control" id="responsiblePartyId" name="responsiblePartyId">
+                    @foreach (var user in dbContext.UserSelectListItems())
+                    {
+                        <option value="@user.Value" data-gravatar-hash="@Gravatar.GetHash(user.Text)">@user.Text</option>
+                    }
+                </select>
             </div>
 
             <div class="form-group">
@@ -55,12 +60,11 @@
     <br />
 
     <ul id="itemList" class="list-group">
-
         @foreach (var item in Model.Items)
         {
             <partial name="_TodoItemPartial" model="item"/>
         }
-        </ul>
+    </ul>
 </div>
 
 @section Scripts {
@@ -107,6 +111,7 @@
                 data: $("#addNewItemForm").serialize(),
                 dataType: "html",
                 success: function (itemHtml) {
+                    retrieveResponsiblePartyUsername($('#responsiblePartyId').find(":selected").attr("data-gravatar-hash"));
                     resetAddNewItemForm();
                     rerenderListItems(itemHtml);
                 },
