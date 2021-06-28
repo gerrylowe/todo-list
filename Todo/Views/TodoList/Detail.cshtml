@@ -23,18 +23,18 @@
             @Html.HiddenFor(m => m.TodoListId)
 
             <div class="form-group">
-                <label for="Title">Title</label>
-                <input name="Title" class="form-control" />
+                <label for="title">Title</label>
+                <input id="title" name="title" class="form-control" />
             </div>
 
             <div class="form-group">
-                <label for="Importance">Importance</label>
-                @Html.DropDownList("Importance", SelectListConvenience.ImportanceSelectListItems, new { @class = "form-control" })
+                <label for="importance">Importance</label>
+                @Html.DropDownList("importance", SelectListConvenience.ImportanceSelectListItems, new { @class = "form-control" })
             </div>
 
             <div class="form-group">
-                <label for="ResponsiblePartyId">Responsible Party</label>
-                @Html.DropDownList("ResponsiblePartyId", dbContext.UserSelectListItems(), new { @class = "form-control" })
+                <label for="responsiblePartyId">Responsible Party</label>
+                @Html.DropDownList("responsiblePartyId", dbContext.UserSelectListItems(), new { @class = "form-control" })
             </div>
 
             <div class="form-group">
@@ -107,12 +107,19 @@
                 data: $("#addNewItemForm").serialize(),
                 dataType: "html",
                 success: function (itemHtml) {
+                    resetAddNewItemForm();
                     rerenderListItems(itemHtml);
                 },
                 error: function (xhr, status) {
                     $("#addNewItemError").text(xhr.responseText);
                 }
             });
+        }
+
+        function resetAddNewItemForm() {
+            $("#title").val("");
+            $("#importance").prop("selectedIndex", 0);
+            $("#responsiblePartyId").prop("selectedIndex", 0);
         }
 
         function showHideDoneItems() {
