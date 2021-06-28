@@ -41,6 +41,20 @@ namespace Todo.Controllers
             return RedirectToListDetail(fields.TodoListId);
         }
 
+        [HttpPost]
+        public async Task<IActionResult> DirectCreate(TodoItemCreateFields fields)
+        {
+            if (!ModelState.IsValid) { return Content(ModelState.FormatErrorsAsHtml(), "text/html"); }
+
+            var item = new TodoItem(fields.TodoListId, fields.ResponsiblePartyId, fields.Title, fields.Importance, 0);
+
+            await dbContext.AddAsync(item);
+            await dbContext.SaveChangesAsync();
+
+            await dbContext.Entry(item).Reference(i => i.ResponsibleParty).LoadAsync();
+            return PartialView("_TodoItemPartial", TodoItemSummaryViewmodelFactory.Create(item));
+        }
+
         [HttpGet]
         public IActionResult Edit(int todoItemId)
         {

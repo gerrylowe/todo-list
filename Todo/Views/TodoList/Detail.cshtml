@@ -1,15 +1,51 @@
 ﻿@using Todo.Controllers
+@using Todo.Data
 @using Todo.Data.Entities
 @using Todo.Services
+@using Todo.Views.TodoItem
 @model Todo.Models.TodoLists.TodoListDetailViewmodel
 
 @{
     ViewData["Title"] = $"List: {Model.Title}";
 }
 
+@inject ApplicationDbContext dbContext
+
 <h2>@ViewData["Title"]</h2>
 
-<div class="col-md-6">
+<h4>Add New Item</h4>
+
+<div class="col-md-4">
+    <section>
+        <form id="addNewItemForm">
+            <span id="addNewItemError" class="text-danger"></span>
+
+            @Html.HiddenFor(m => m.TodoListId)
+
+            <div class="form-group">
+                <label for="Title">Title</label>
+                <input name="Title" class="form-control" />
+            </div>
+
+            <div class="form-group">
+                <label for="Importance">Importance</label>
+                @Html.DropDownList("Importance", SelectListConvenience.ImportanceSelectListItems, new { @class = "form-control" })
+            </div>
+
+            <div class="form-group">
+                <label for="ResponsiblePartyId">Responsible Party</label>
+                @Html.DropDownList("ResponsiblePartyId", dbContext.UserSelectListItems(), new { @class = "form-control" })
+            </div>
+
+            <div class="form-group">
+                <button id="addNewItemButton" type="button" class="btn btn-default">Add</button>
+            </div>
+
+        </form>
+    </section>
+</div>
+
+<div class="col-md-8">
 
     <input type="checkbox" id="showHideDoneItems">
     <label for="showHideDoneItems">Hide items marked as done</label>
@@ -28,57 +64,9 @@
 
         @foreach (var item in Model.Items)
         {
-            string contextualClass;
-            switch (item.Importance)
-            {
-                case Importance.High:
-                    contextualClass = item.IsDone ? "list-group-item-danger list-group-item-done" : "list-group-item-danger";
-                    break;
-                case Importance.Low:
-                    contextualClass = item.IsDone ? "list-group-item-info list-group-item-done" : "list-group-item-info";
-                    break;
-                default:
-                    contextualClass = item.IsDone ? "list-group-item-done" : "";
-                    break;
-            }
-
-            <li class="list-group-item @contextualClass" data-rank="@item.Rank">
-
-                <div class="row">
-
-                <div class="col-md-6">
-                    <a asp-action="Edit" asp-controller="TodoItem" asp-route-todoItemId="@item.TodoItemId">
-
-                        @if (item.IsDone)
-                        {
-                            <s>@item.Title</s>
-                        }
-                        else
-                        {
-                            <text>@item.Title</text>
-                        }
-                    </a>
-                </div>
-
-                <div class="col-md-2">
-                    Rank: @item.Rank
-                </div>
-
-                <div class="col-md-4 text-right">
-                    <small>
-                        @item.ResponsibleParty.UserName
-
-                        <img src="https://www.gravatar.com/avatar/@Gravatar.GetHash(item.ResponsibleParty.Email)?s=30"/>
-
-                        <span data-user-hash="@Gravatar.GetHash(item.ResponsibleParty.Email)"></span>
-
-                    </small>
-                </div>
-                </div>
-
-            </li>
+            <partial name="_TodoItemPartial" model="item"/>
         }
-    </ul>
+        </ul>
 </div>
 
 @section Scripts {
@@ -86,6 +74,7 @@
         var originalItems = [];
 
         $(document).ready(function () {
+            $("#addNewItemButton").click(addNewItem);
             $("#showHideDoneItems").change(showHideDoneItems);
             $("#sortItemsByRank").change(sortItemsByRank);
 
@@ -121,6 +110,22 @@
 
         function onUsernameRetrieved(profile) {
             $("span[data-user-hash='" + profile.entry[0].hash + "']").text(profile.entry[0].displayName);
+        }
+
+        function addNewItem() {
+            $("#addNewItemError").text("");
+            $.ajax({
+                type: "POST",
+                url: "@Url.Action("DirectCreate", "TodoItem")",
+                data: $("#addNewItemForm").serialize(),
+                dataType: "html",
+                success: function (itemHtml) {
+                    $("#itemList").append(itemHtml);
+                },
+                error: function (xhr, status) {
+                    $("#addNewItemError").text(xhr.responseText);
+                }
+            });
         }
 
         function showHideDoneItems() {
