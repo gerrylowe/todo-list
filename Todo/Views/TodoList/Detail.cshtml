@@ -107,7 +107,7 @@
                 data: $("#addNewItemForm").serialize(),
                 dataType: "html",
                 success: function (itemHtml) {
-                    $("#itemList").append(itemHtml);
+                    rerenderListItems(itemHtml);
                 },
                 error: function (xhr, status) {
                     $("#addNewItemError").text(xhr.responseText);
@@ -124,19 +124,25 @@
         }
 
         function changeSortOrder() {
-            var items = $("#itemList li").detach();
+            rerenderListItems();
+        }
 
-            if (this.checked == true) {
+        function rerenderListItems(newItemHtml) {
+            if (newItemHtml !== undefined) {
+                $("#itemList").append(newItemHtml);
+            }
+
+            var items = $("#itemList li").detach();
+            if ($("#sortItemsByRank").prop("checked")) {
                 items.sort(compareItemsByRank);
             } else {
                 items.sort(compareItemsByImportance);
             }
-
             $("#itemList").append(items);
         }
 
         function compareItemsByImportance(item1, item2) {
-            // Descending by rank.
+            // Ascending by importance.
             var importance1 = parseInt($(item1).attr("data-importance"));
             var importance2 = parseInt($(item2).attr("data-importance"));
             return importance1 - importance2;
