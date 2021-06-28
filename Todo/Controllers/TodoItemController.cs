@@ -83,5 +83,20 @@ namespace Todo.Controllers
         {
             return RedirectToAction("Detail", "TodoList", new {todoListId = fieldsTodoListId});
         }
+
+        [HttpPost]
+        public async Task<IActionResult> UpdateRank(TodoItemUpdateRankFields fields)
+        {
+            if (!ModelState.IsValid) { return Json(ModelState.FormatErrorsForJson()); }
+
+            var todoItem = dbContext.SingleTodoItem(fields.TodoItemId);
+            todoItem.Rank = fields.Rank;
+
+            dbContext.Update(todoItem);
+            await dbContext.SaveChangesAsync();
+
+            await dbContext.Entry(todoItem).Reference(i => i.ResponsibleParty).LoadAsync();
+            return Json(TodoItemSummaryViewmodelFactory.Create(todoItem));
+        }
     }
 }

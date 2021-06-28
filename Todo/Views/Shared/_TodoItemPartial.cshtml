@@ -19,7 +19,7 @@
     }
 }
 
-<li class="list-group-item @contextualClass" data-importance="@((int) Model.Importance)" data-rank="@Model.Rank">
+<li id="listItem-@Model.TodoItemId" class="list-group-item @contextualClass" data-importance="@((int) Model.Importance)" data-rank="@Model.Rank">
     <div class="row">
 
         <div class="col-md-6">
@@ -36,7 +36,10 @@
         </div>
 
         <div class="col-md-2">
-            Rank: @Model.Rank
+            <label for="rank">Rank</label>
+            <input type="number" id="rankInput-@Model.TodoItemId" name="rank" class="form-control input-sm" value="@Model.Rank" />
+            <span id="rankFeedback-@Model.TodoItemId"></span>
+            <button id="rankButton-@Model.TodoItemId" type="button" class="btn btn-sm rank-update-button">Update</button>
         </div>
 
         <div class="col-md-4 text-right">

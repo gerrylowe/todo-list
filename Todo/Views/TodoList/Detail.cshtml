@@ -73,6 +73,7 @@
             $("#addNewItemButton").click(addNewItem);
             $("#showHideDoneItems").change(showHideDoneItems);
             $("#sortItemsByRank").change(changeSortOrder);
+            $(".rank-update-button").click(updateItemRank);
 
             setResponsiblePartyUsernames();
         });
@@ -111,6 +112,7 @@
                 data: $("#addNewItemForm").serialize(),
                 dataType: "html",
                 success: function (itemHtml) {
+                    // Trigger gravatar profile lookup & update list items.
                     retrieveResponsiblePartyUsername($('#responsiblePartyId').find(":selected").attr("data-gravatar-hash"));
                     resetAddNewItemForm();
                     rerenderListItems(itemHtml);
@@ -165,6 +167,29 @@
             var rank1 = parseInt($(item1).attr("data-rank"));
             var rank2 = parseInt($(item2).attr("data-rank"));
             return rank2 - rank1;
+        }
+
+        function updateItemRank() {
+            // Get item id from button id.
+            var itemId = this.id.split("-")[1];
+            var itemRank = parseInt($("#rankInput-" + itemId).val());
+
+            $("#rankFeedback-" + itemId).text("");
+            $.ajax({
+                type: "POST",
+                url: "@Url.Action("UpdateRank", "TodoItem")",
+                data: { todoItemId: itemId, rank: itemRank},
+                dataType: "html",
+                success: function () {
+                    // Show feedback & update list items.
+                    $("#rankFeedback-" + itemId).text("Success");
+                    $("#listItem-" + itemId).attr("data-rank", itemRank);
+                    rerenderListItems();
+                },
+                error: function (xhr, status) {
+                    $("#rankFeedback-" + itemId).text(xhr.response.errorMessage);
+                }
+            });
         }
     </script>
 }
