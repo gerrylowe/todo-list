@@ -56,12 +56,6 @@
 
     <ul id="itemList" class="list-group">
 
-        <li class="list-group-item">
-            <a asp-action="Create" asp-controller="TodoItem" asp-route-todoListId="@Model.TodoListId">
-                <strong>Add New Item</strong>
-            </a>
-        </li>
-
         @foreach (var item in Model.Items)
         {
             <partial name="_TodoItemPartial" model="item"/>
@@ -71,17 +65,10 @@
 
 @section Scripts {
     <script>
-        var originalItems = [];
-
         $(document).ready(function () {
             $("#addNewItemButton").click(addNewItem);
             $("#showHideDoneItems").change(showHideDoneItems);
-            $("#sortItemsByRank").change(sortItemsByRank);
-
-            // Store original items so that sort order can be restored.
-            $("#itemList li[data-rank]").each(function () {
-                originalItems.push($(this));
-            });
+            $("#sortItemsByRank").change(changeSortOrder);
 
             setResponsiblePartyUsernames();
         });
@@ -136,32 +123,30 @@
             }
         }
 
-        function sortItemsByRank() {
-            var sortedItems = [];
+        function changeSortOrder() {
+            var items = $("#itemList li").detach();
+
             if (this.checked == true) {
-                // Order items by rank.
-                $("#itemList li[data-rank]").each(function () {
-                    sortedItems.push($(this));
-                });
-                sortedItems.sort(compareItems);
-                showItems(sortedItems);
+                items.sort(compareItemsByRank);
             } else {
-                // Restore original item order.
-                showItems(originalItems);
+                items.sort(compareItemsByImportance);
             }
+
+            $("#itemList").append(items);
         }
 
-        function compareItems(item1, item2) {
+        function compareItemsByImportance(item1, item2) {
+            // Descending by rank.
+            var importance1 = parseInt($(item1).attr("data-importance"));
+            var importance2 = parseInt($(item2).attr("data-importance"));
+            return importance1 - importance2;
+        }
+
+        function compareItemsByRank(item1, item2) {
             // Descending by rank.
             var rank1 = parseInt($(item1).attr("data-rank"));
             var rank2 = parseInt($(item2).attr("data-rank"));
             return rank2 - rank1;
-        }
-
-        function showItems(items) {
-            // Replace all items except first (the "add new item" <li>).
-            $("#itemList").slice(1).remove();
-            $("#itemList").append(items);
         }
     </script>
 }
